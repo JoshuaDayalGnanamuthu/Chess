@@ -5,8 +5,8 @@
 
 typedef std::vector<std::vector<std::string>> board;
 struct Position {
-    int posX = -1;
     int posY = -1;
+    int posX = -1;
 };
 
 class Bishop {
