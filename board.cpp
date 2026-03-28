@@ -3,11 +3,17 @@
 #include <vector>
 #include <map>
 
+struct Position {
+    int posX = -1;
+    int posY = -1;
+};
+
 
 class Board {
     typedef std::vector<std::vector<std::string>> board;
     public:
-        std::map<std::string, int> column_alias = {
+        std::map<std::string, int> column_alias = 
+        {
             {"a", 0},
             {"b", 1},
             {"c", 2},
@@ -17,8 +23,9 @@ class Board {
             {"g", 6},
             {"h", 7}
         };
-        
-        board chess_board = {
+
+        board chess_board = 
+        {
             {"bR2","bN2","bB2","bQ","bK","bB1","bN1","bR1"},
             {"bP8","bP7","bP6","bP5","bP4","bP3","bP2","bP1"},
             {" "," "," "," "," "," "," "," "},
@@ -71,12 +78,27 @@ class Board {
         }
 
     private:
-        std::map<std::string, std::string> sprites = {
+        std::map<std::string, std::string> sprites = 
+        {
             {"wP", "♟"}, {"wR", "♜"}, {"wN", "♞"}, {"wB", "♝"}, {"wQ", "♛"}, {"wK", "♚"}, 
             {"bP", "♙"}, {"bR", "♖"}, {"bN", "♘"}, {"bB", "♗"}, {"bQ", "♕"}, {"bK", "♔"},
             {" ", " "}
         };
+
+        static const std::map<std::string, Position> piece_positions;
 };
+
+const std::map<std::string, Position> Board::piece_positions = 
+        {
+            {"bR2", {0, 0}}, {"bN2", {0, 1}}, {"bB2", {0, 2}}, {"bQ",  {0, 3}},
+            {"bK",  {0, 4}}, {"bB1", {0, 5}}, {"bN1", {0, 6}}, {"bR1", {0, 7}},
+            {"bP8", {1, 0}}, {"bP7", {1, 1}}, {"bP6", {1, 2}}, {"bP5", {1, 3}},
+            {"bP4", {1, 4}}, {"bP3", {1, 5}}, {"bP2", {1, 6}}, {"bP1", {1, 7}},
+            {"wP1", {6, 0}}, {"wP2", {6, 1}}, {"wP3", {6, 2}}, {"wP4", {6, 3}},
+            {"wP5", {6, 4}}, {"wP6", {6, 5}}, {"wP7", {6, 6}}, {"wP8", {6, 7}},
+            {"wR1", {7, 0}}, {"wN1", {7, 1}}, {"wB1", {7, 2}}, {"wQ",  {7, 3}},
+            {"wK",  {7, 4}}, {"wB2", {7, 5}}, {"wN2", {7, 6}}, {"wR2", {7, 7}}
+        };
 
 int main()
 {
