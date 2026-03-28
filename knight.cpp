@@ -4,10 +4,10 @@
 #include <map>
 
 typedef std::vector<std::vector<std::string>> board;
-typedef struct {
-    int posY = -1;
+struct Position {
     int posX = -1;
-} Position;
+    int posY = -1;
+};
 
 class Knight {
     public:
