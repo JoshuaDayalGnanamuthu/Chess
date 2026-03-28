@@ -4,8 +4,8 @@
 #include <map>
 
 struct Position {
-    int posX = -1;
     int posY = -1;
+    int posX = -1;
 };
 
 
