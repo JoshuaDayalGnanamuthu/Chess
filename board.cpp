@@ -93,9 +93,10 @@ const std::map<std::string, Position> Board::default_piece_positions =
 
 int main()
 {
-    Board board = Board();
-    board.makeBoard();
-    board.printBoardWhite();
-    board.printBoardBlack();
+    Board* board = new Board();
+    board->makeBoard();
+    board->printBoardWhite();
+    board->printBoardBlack();
+    delete board;
     return 0;
 }
