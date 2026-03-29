@@ -8,36 +8,27 @@ struct Position {
     int posX = -1;
 };
 
-
 class Board {
     typedef std::vector<std::vector<std::string>> board;
     public:
         std::map<std::string, int> column_alias = 
         {
-            {"a", 0},
-            {"b", 1},
-            {"c", 2},
-            {"d", 3},
-            {"e", 4},
-            {"f", 5},
-            {"g", 6},
-            {"h", 7}
-        };
-
-        board chess_board = 
-        {
-            {"bR2","bN2","bB2","bQ","bK","bB1","bN1","bR1"},
-            {"bP8","bP7","bP6","bP5","bP4","bP3","bP2","bP1"},
-            {" "," "," "," "," "," "," "," "},
-            {" "," "," "," "," "," "," "," "},
-            {" "," "," "," "," "," "," "," "},
-            {" "," "," "," "," "," "," "," "},
-            {"wP1","wP2","wP3", "wP4","wP5","wP6","wP7","wP8"},
-            {"wR1","wN1","wB1","wQ","wK","wB2","wN2","wR2"}        
+            {"a", 0}, {"b", 1}, {"c", 2}, {"d", 3}, 
+            {"e", 4}, {"f", 5}, {"g", 6}, {"h", 7}
         };
 
         size_t num_rows = 8;
         size_t num_cols = 8;
+        board chess_board = board(num_rows, std::vector<std::string>(num_cols, " "));
+        
+        void makeBoard(void) {
+            for (auto &pair: Board::default_piece_positions) {
+                int row = pair.second.posY;
+                int col = pair.second.posX;
+                std::string piece = pair.first;
+                this->chess_board[row][col] = piece;
+            }
+        }
 
         void printBoardWhite(void) {
             std::cout << "\n    a   b   c   d   e   f   g   h\n";
@@ -85,10 +76,10 @@ class Board {
             {" ", " "}
         };
 
-        static const std::map<std::string, Position> piece_positions;
+        static const std::map<std::string, Position> default_piece_positions;
 };
 
-const std::map<std::string, Position> Board::piece_positions = 
+const std::map<std::string, Position> Board::default_piece_positions = 
         {
             {"bR2", {0, 0}}, {"bN2", {0, 1}}, {"bB2", {0, 2}}, {"bQ",  {0, 3}},
             {"bK",  {0, 4}}, {"bB1", {0, 5}}, {"bN1", {0, 6}}, {"bR1", {0, 7}},
@@ -103,6 +94,7 @@ const std::map<std::string, Position> Board::piece_positions =
 int main()
 {
     Board board = Board();
+    board.makeBoard();
     board.printBoardWhite();
     board.printBoardBlack();
     return 0;
