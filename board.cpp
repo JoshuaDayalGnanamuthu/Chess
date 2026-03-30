@@ -3,158 +3,12 @@
 #include <vector>
 #include <map>
 #include <SFML/Graphics.hpp>
+#include "board.hpp"
 
 const sf::Color LIGHT_COLOR(255, 255, 255);
 const sf::Color DARK_COLOR(118, 150, 0);
 const int TILE_SIZE = 50;
     
-struct Position {
-    int posY = -1;
-    int posX = -1;
-};
-typedef std::map<std::string, Position> Positions;
-
-class Board {
-    typedef std::vector<std::vector<std::string>> board;
-    public:
-        std::map<std::string, int> column_alias = 
-        {
-            {"a", 0}, {"b", 1}, {"c", 2}, {"d", 3}, 
-            {"e", 4}, {"f", 5}, {"g", 6}, {"h", 7}
-        };
-
-        size_t num_rows = 8;
-        size_t num_cols = 8;
-        board chess_board = board(num_rows, std::vector<std::string>(num_cols, " "));
-        sf::RenderWindow &window;
-        Positions piece_positions;
-        
-        Board(sf::RenderWindow &window, Positions piece_positions = Board::default_piece_positions, int frameRate = 60): window(window) {
-            this->window.setFramerateLimit(frameRate);
-            this->piece_positions = piece_positions;
-
-        }  
-
-        void makeBoard(void) {
-            for (auto &pair: piece_positions) {
-                int row = pair.second.posY;
-                int col = pair.second.posX;
-                std::string piece = pair.first;
-                this->chess_board[row][col] = piece;
-            }
-        }
-
-        void printBoardWhite(void) {
-            makeBoard();
-            MakeSprites();
-            while (window.isOpen())
-            {
-                while (const std::optional event = window.pollEvent())
-                {
-                    if (event->is<sf::Event::Closed>())
-                        return;
-                }
-
-                window.clear(sf::Color::Black);
-
-                for (int row = 0; row < 8; row++)
-                {
-                    for (int col = 0; col < 8; col++)
-                    {
-                        sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
-                        tile.setPosition(sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE));
-                        if ((row + col) % 2 == 0)
-                            tile.setFillColor(LIGHT_COLOR);
-                        else
-                            tile.setFillColor(DARK_COLOR);
-                        window.draw(tile);
-
-                        std::string piece = this->chess_board[row][col];
-                        std::string pieceKey = piece.substr(0, 2);
-                        if (textures.count(pieceKey))
-                        {
-                            sf::Sprite sprite(textures[pieceKey]);
-                            sprite.setScale(sf::Vector2f((float)TILE_SIZE / textures[pieceKey].getSize().x,
-                                                         (float)TILE_SIZE / textures[pieceKey].getSize().y));
-                            sprite.setPosition(sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE));
-                            window.draw(sprite);
-                        }
-                    }
-                }
-                window.display();
-            }
-        }
-
-        void printBoardBlack(void) {
-            makeBoard();
-            MakeSprites();
-            while (window.isOpen())
-            {
-                while (const std::optional event = window.pollEvent())
-                {
-                    if (event->is<sf::Event::Closed>())
-                        return;
-                }
-
-                window.clear(sf::Color::Black);
-
-                for (int row = 7; row >= 0; row--)
-                {
-                    for (int col = 7; col >= 0; col--)
-                    {
-                        int drawRow = 7 - row;
-                        int drawCol = 7 - col;
-
-                        sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
-                        tile.setPosition(sf::Vector2f(drawCol * TILE_SIZE, drawRow * TILE_SIZE));
-                        if ((row + col) % 2 == 0)
-                            tile.setFillColor(LIGHT_COLOR);
-                        else
-                            tile.setFillColor(DARK_COLOR);
-                        window.draw(tile);
-
-                        std::string piece = this->chess_board[row][col];
-                        std::string pieceKey = piece.substr(0, 2);
-                        if (textures.count(pieceKey))
-                        {
-                            sf::Sprite sprite(textures[pieceKey]);
-                            sprite.setScale(sf::Vector2f(
-                                (float)TILE_SIZE / textures[pieceKey].getSize().x,
-                                (float)TILE_SIZE / textures[pieceKey].getSize().y
-                            ));
-                            sprite.setPosition(sf::Vector2f(drawCol * TILE_SIZE, drawRow * TILE_SIZE));
-                            window.draw(sprite);
-                        }
-                    }
-                }
-                window.display();
-            }
-        }
-
-    private:
-        std::map<std::string, std::string> file_paths = 
-        {
-            {"wP", "koval/wP.png"}, {"wR", "koval/wR.png"}, {"wN", "koval/wN.png"}, {"wB", "koval/wB.png"}, {"wQ", "koval/wQ.png"}, {"wK", "koval/wK.png"}, 
-            {"bP", "koval/bP.png"}, {"bR", "koval/bR.png"}, {"bN", "koval/bN.png"}, {"bB", "koval/bB.png"}, {"bQ", "koval/bQ.png"}, {"bK", "koval/bK.png"},
-            {" ", " "}
-        };
-
-        std::map<std::string, sf::Texture> textures;
-
-        void MakeSprites() 
-        {
-            for ( auto &pair: file_paths ) 
-            {
-                if (pair.second == " ") continue;
-                if (!textures[pair.first].loadFromFile(pair.second))
-                    std::cerr << "Failed to load texture: " << pair.second << "\n";
-                    return;
-            }
-        }
-
-        static const Positions default_piece_positions;
-};
-
 const Positions Board::default_piece_positions = 
         {
             {"bR2", {0, 0}}, {"bN2", {0, 1}}, {"bB2", {0, 2}}, {"bQ",  {0, 3}},
@@ -167,18 +21,130 @@ const Positions Board::default_piece_positions =
             {"wK",  {7, 4}}, {"wB2", {7, 5}}, {"wN2", {7, 6}}, {"wR2", {7, 7}}
         };
 
-int main()
-{
-    sf::RenderWindow window(sf::VideoMode({400, 400}), "Chess");
-    window.setFramerateLimit(60);
-    sf::Image icon;
-    if (!icon.loadFromFile("icons/chess.png"))
-        return -1;
-    window.setIcon(icon.getSize() , icon.getPixelsPtr());
-    Board* board = new Board(window);
-    board->printBoardWhite();
-    board->printBoardBlack();
-    window.close();
-    delete board;
-    return 0;
+Board::Board(sf::RenderWindow &window, Positions piece_positions, int frameRate): window(window) {
+    this->window.setFramerateLimit(frameRate);
+    this->piece_positions = piece_positions;
+    makeBoard();
+    MakeSprites();
 }
+
+void Board::makeBoard(void) {
+    for (auto &pair: piece_positions) {
+        int row = pair.second.posY;
+        int col = pair.second.posX;
+        std::string piece = pair.first;
+        this->chess_board[row][col] = piece;
+    }
+}
+
+void Board::MakeSprites() 
+{
+    for ( auto &pair: file_paths ) 
+    {
+        if (pair.second == " ") continue;
+        if (!textures[pair.first].loadFromFile(pair.second)) {
+            std::cerr << "Failed to load texture: " << pair.second << "\n";
+            return;
+        };
+    }
+}
+
+void Board::printBoardWhite(void) {
+    makeBoard();
+    while (window.isOpen())
+    {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+                return;
+        }
+
+        window.clear(sf::Color::Black);
+
+        for (int row = 0; row < 8; row++)
+        {
+            for (int col = 0; col < 8; col++)
+            {
+                sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
+                tile.setPosition(sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE));
+                if ((row + col) % 2 == 0)
+                    tile.setFillColor(LIGHT_COLOR);
+                else
+                    tile.setFillColor(DARK_COLOR);
+                window.draw(tile);
+
+                std::string piece = this->chess_board[row][col];
+                std::string pieceKey = piece.substr(0, 2);
+                if (textures.count(pieceKey))
+                {
+                    sf::Sprite sprite(textures[pieceKey]);
+                    sprite.setScale(sf::Vector2f((float)TILE_SIZE / textures[pieceKey].getSize().x,
+                                                 (float)TILE_SIZE / textures[pieceKey].getSize().y));
+                    sprite.setPosition(sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE));
+                    window.draw(sprite);
+                }
+            }
+        }
+        window.display();
+    }
+}
+
+void Board::printBoardBlack(void) {
+    makeBoard();
+    while (window.isOpen())
+    {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+                return;
+        }
+        window.clear(sf::Color::Black);
+
+        for (int row = 7; row >= 0; row--)
+        {
+            for (int col = 7; col >= 0; col--)
+            {
+                int drawRow = 7 - row;
+                int drawCol = 7 - col;
+
+                sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
+                tile.setPosition(sf::Vector2f(drawCol * TILE_SIZE, drawRow * TILE_SIZE));
+                if ((row + col) % 2 == 0)
+                    tile.setFillColor(LIGHT_COLOR);
+                else
+                    tile.setFillColor(DARK_COLOR);
+                window.draw(tile);
+
+                std::string piece = this->chess_board[row][col];
+                std::string pieceKey = piece.substr(0, 2);
+                if (textures.count(pieceKey))
+                {
+                    sf::Sprite sprite(textures[pieceKey]);
+                    sprite.setScale(sf::Vector2f(
+                        (float)TILE_SIZE / textures[pieceKey].getSize().x,
+                        (float)TILE_SIZE / textures[pieceKey].getSize().y
+                    ));
+                    sprite.setPosition(sf::Vector2f(drawCol * TILE_SIZE, drawRow * TILE_SIZE));
+                    window.draw(sprite);
+                }
+            }
+        }
+        window.display();
+    }
+}
+
+// int main()
+// {
+//     sf::RenderWindow window(sf::VideoMode({400, 400}), "Chess");
+//     window.setFramerateLimit(60);
+//     sf::Image icon;
+//     if (!icon.loadFromFile("icons/chess.png"))
+//         return -1;
+//     window.setIcon(icon.getSize() , icon.getPixelsPtr());
+//     Board* board = new Board(window);
+//     board->printBoardWhite();
+//     board->printBoardBlack();
+//     window.close();
+//     delete board;
+//     return 0;
+// }
