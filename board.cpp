@@ -2,7 +2,12 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <SFML/Graphics.hpp>
 
+#define LIGHT_COLOR (sf::Color (255, 255, 255));
+#define DARK_COLOR  (sf::Color (118, 150, 86));
+#define TILE_SIZE 50;
+    
 struct Position {
     int posY = -1;
     int posX = -1;
@@ -93,6 +98,25 @@ const std::map<std::string, Position> Board::default_piece_positions =
 
 int main()
 {
+    sf::RenderWindow window(sf::VideoMode({400, 400}), "Chess");
+    window.setFramerateLimit(60);
+    sf::Image icon;
+    if (!icon.loadFromFile("icons/chess.png"))
+        return -1;
+    window.setIcon(icon.getSize() , icon.getPixelsPtr());
+
+    while (window.isOpen())
+    {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+                window.close();
+        }
+        window.display();
+    }
+    
+    
+
     Board* board = new Board();
     board->makeBoard();
     board->printBoardWhite();
