@@ -1,0 +1,26 @@
+#include "piece.hpp"
+
+Piece::Piece(std::string type, std::string number, Position position, bool isWhite = true)
+: type(type), number(number), position(position), isWhite(isWhite)
+{
+    this->piece = (isWhite ? "w" : "b") + type + number;
+}
+
+bool Piece::canMoveTo(const std::string &target_piece) const {
+    if (target_piece == " ") return true;
+    if (isWhite && target_piece.substr(0, 1) == "b") return true;
+    if (!isWhite && target_piece.substr(0, 1) == "w") return true;
+    return false;
+}
+
+const std::map<std::string, Position> Piece::default_piece_positions = 
+{
+    {"bR2", {0, 0}}, {"bN2", {0, 1}}, {"bB2", {0, 2}}, {"bQ",  {0, 3}},
+    {"bK",  {0, 4}}, {"bB1", {0, 5}}, {"bN1", {0, 6}}, {"bR1", {0, 7}},
+    {"bP8", {1, 0}}, {"bP7", {1, 1}}, {"bP6", {1, 2}}, {"bP5", {1, 3}},
+    {"bP4", {1, 4}}, {"bP3", {1, 5}}, {"bP2", {1, 6}}, {"bP1", {1, 7}},
+    {"wP1", {6, 0}}, {"wP2", {6, 1}}, {"wP3", {6, 2}}, {"wP4", {6, 3}},
+    {"wP5", {6, 4}}, {"wP6", {6, 5}}, {"wP7", {6, 6}}, {"wP8", {6, 7}},
+    {"wR1", {7, 0}}, {"wN1", {7, 1}}, {"wB1", {7, 2}}, {"wQ",  {7, 3}},
+    {"wK",  {7, 4}}, {"wB2", {7, 5}}, {"wN2", {7, 6}}, {"wR2", {7, 7}}
+};
