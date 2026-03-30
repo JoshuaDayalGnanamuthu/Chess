@@ -148,6 +148,7 @@ class Board {
                 if (pair.second == " ") continue;
                 if (!textures[pair.first].loadFromFile(pair.second))
                     std::cerr << "Failed to load texture: " << pair.second << "\n";
+                    return;
             }
         }
 
