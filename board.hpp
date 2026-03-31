@@ -4,20 +4,13 @@
 #include <vector>
 #include <map>
 #include <SFML/Graphics.hpp>
+#include "piece.hpp"
 
 extern const sf::Color LIGHT_COLOR;
 extern const sf::Color DARK_COLOR;
 extern const int TILE_SIZE;
 
-struct Position {
-    int posY = -1;
-    int posX = -1;
-};
-typedef std::map<std::string, Position> Positions;
-
 class Board {
-    typedef std::vector<std::vector<std::string>> board;
-
 public:
     std::map<std::string, int> column_alias = 
     {
