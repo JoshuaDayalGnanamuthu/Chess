@@ -12,10 +12,8 @@
 #include "pawn.hpp"
 #include "bishop.hpp"
 
-
 PieceMap makePieces() {
     PieceMap pieces;
-
     pieces["bR2"] = std::make_unique<Rook>("2", Position{0, 0}, false);
     pieces["bN2"] = std::make_unique<Knight>("2", Position{0, 1}, false);
     pieces["bB2"] = std::make_unique<Bishop>("2", Position{0, 2}, false);
@@ -48,20 +46,29 @@ PieceMap makePieces() {
     pieces["wB2"] = std::make_unique<Bishop>("2", Position{7, 5}, true);
     pieces["wN2"] = std::make_unique<Knight>("2", Position{7, 6}, true);
     pieces["wR2"] = std::make_unique<Rook>("2", Position{7, 7}, true);
-
     return pieces;
 }
 
-std::vector<Position> validMoves(PieceMap& pieces, const board& gameboard, bool isWhite) {
-    std::vector<Position> moveset;
+std::map<std::string, std::vector<Position>> validMoves(PieceMap& pieces, const board& gameboard, bool isWhite) {
+    std::map<std::string, std::vector<Position>> moveset;
     std::string color = isWhite ? "w" : "b";
-    for (auto &pair: pieces) {
-        if (pair.first.substr(0, 1) == color) {
-            std::vector<Position> submoveset = pair.second->validMoves(gameboard);
-            moveset.insert(moveset.end(), submoveset.begin(), submoveset.end());
-        }
+    for (auto &pair : pieces) {
+        if (pair.first.substr(0, 1) == color)
+            moveset[pair.first] = pair.second->validMoves(gameboard);
     }
     return moveset;
+}
+
+Position tilePressed(int posX, int posY, bool isWhite) {
+    Position tile;
+    if (isWhite) {
+        tile.posY = posY;
+        tile.posX = posX;
+    } else {
+        tile.posY = 7 - posY;
+        tile.posX = 7 - posX;
+    }
+    return tile;
 }
 
 int main(void) {
@@ -71,24 +78,44 @@ int main(void) {
     sf::Image icon;
     if (!icon.loadFromFile("icons/chess.png"))
         return -1;
-    window.setIcon(icon.getSize() , icon.getPixelsPtr());
-
+    window.setIcon(icon.getSize(), icon.getPixelsPtr());
 
     PieceMap pieces = makePieces();
     Board* gameboard = new Board(window, pieces, 60);
-    bool whitePerspective = true;
+    bool whitePerspective = false;
+    std::string color = whitePerspective ? "w" : "b";
+    std::vector<Position> highlights;
+    Position tile_pressed = {-1, -1};
 
-    while (window.isOpen())
-    {
-        while (const std::optional event = window.pollEvent())
-        {
+    while (window.isOpen()) {
+        while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
                 window.close();
-        }
-        gameboard->drawBoard(whitePerspective);
-        
-    }
 
+            if (const auto* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (mouseEvent->button == sf::Mouse::Button::Left) {
+                    Position tile = tilePressed(mouseEvent->position.x / TILE_SIZE,
+                                               mouseEvent->position.y / TILE_SIZE,
+                                               whitePerspective);
+                    if (tile_pressed.posX == tile.posX && tile_pressed.posY == tile.posY) {
+                        tile_pressed = {-1, -1};
+                        highlights.clear();
+                    } else {
+                        tile_pressed = tile;
+                        std::string clicked = gameboard->chess_board[tile.posY][tile.posX];
+                        if (clicked != " " && clicked.substr(0, 1) == color) {
+                            auto moves = validMoves(pieces, gameboard->chess_board, whitePerspective);
+                            highlights = moves[clicked];
+                        } else {
+                            highlights.clear();
+                        }
+                    }
+                }
+            }
+        }
+
+        gameboard->drawBoard(whitePerspective, highlights);
+    }
 
     delete gameboard;
     return 0;
