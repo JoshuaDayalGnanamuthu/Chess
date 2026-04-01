@@ -11,6 +11,9 @@
 #include "rook.hpp"
 #include "pawn.hpp"
 #include "bishop.hpp"
+#include <algorithm>
+#include <chrono>
+#include <thread>
 
 PieceMap makePieces() {
     PieceMap pieces;
@@ -82,7 +85,7 @@ int main(void) {
 
     PieceMap pieces = makePieces();
     Board* gameboard = new Board(window, pieces, 60);
-    bool whitePerspective = false;
+    bool whitePerspective = true;
     std::string color = whitePerspective ? "w" : "b";
     std::vector<Position> highlights;
     Position tile_pressed = {-1, -1};
@@ -97,6 +100,21 @@ int main(void) {
                     Position tile = tilePressed(mouseEvent->position.x / TILE_SIZE,
                                                mouseEvent->position.y / TILE_SIZE,
                                                whitePerspective);
+                    if (!highlights.empty()) {
+                        if (std::find(highlights.cbegin(), highlights.cend(), tile) != highlights.cend()) {
+                            std::string piece = gameboard->chess_board[tile_pressed.posY][tile_pressed.posX];
+                            std::string target_piece = gameboard->chess_board[tile.posY][tile.posX];
+                            if (target_piece != " ") {
+                                pieces.erase(target_piece);
+                            }
+                            gameboard->chess_board[tile.posY][tile.posX] = piece;
+                            gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
+                            pieces[piece]->position = tile;
+                            pieces[piece]->hasMoved = true;
+                            whitePerspective = !whitePerspective;
+                            color = whitePerspective ? "w" : "b";
+                        }
+                    }
                     if (tile_pressed.posX == tile.posX && tile_pressed.posY == tile.posY) {
                         tile_pressed = {-1, -1};
                         highlights.clear();
@@ -110,6 +128,7 @@ int main(void) {
                             highlights.clear();
                         }
                     }
+                    
                 }
             }
         }
