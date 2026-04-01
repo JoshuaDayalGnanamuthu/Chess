@@ -1,7 +1,7 @@
 #include "piece.hpp"
 
 Piece::Piece(std::string type, std::string number, Position position, bool isWhite = true)
-: type(type), number(number), position(position), isWhite(isWhite)
+: isWhite(isWhite), type(type), number(number), position(position)
 {
     this->piece = (isWhite ? "w" : "b") + type + number;
 }
