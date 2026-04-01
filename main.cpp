@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <memory>
 #include "board.hpp"
 #include "piece.hpp"
@@ -89,6 +90,13 @@ int main(void) {
     std::string color = whitePerspective ? "w" : "b";
     std::vector<Position> highlights;
     Position tile_pressed = {-1, -1};
+    sf::SoundBuffer buffer;
+    if (!buffer.loadFromFile("audio/game_start.mp3")) {
+        std::cerr << "Error loading sound effect" << std::endl;
+        return -1;
+    }
+    sf::Sound sound(buffer);
+    sound.play();
 
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
@@ -111,6 +119,30 @@ int main(void) {
                             gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
                             pieces[piece]->position = tile;
                             pieces[piece]->hasMoved = true;
+                            highlights.clear();
+                            
+                            sf::SoundBuffer moveBuffer;
+                            sf::SoundBuffer captureBuffer;
+                            if (!moveBuffer.loadFromFile("audio/move.mp3")) {
+                                std::cerr << "Error loading sound effect" << std::endl;
+                                return -1;
+                            }
+                            if (!captureBuffer.loadFromFile("audio/capture.mp3")) {
+                                std::cerr << "Error loading sound effect" << std::endl;
+                                return -1;
+                            }
+
+                            sf::Sound moveSound(moveBuffer);
+                            sf::Sound captureSound(captureBuffer);
+                            if (target_piece != " ") {
+                                captureSound.play();
+                            } else {
+                                moveSound.play(); 
+                            }
+                            
+
+                            gameboard->drawBoard(whitePerspective, highlights);
+                            std::this_thread::sleep_for(std::chrono::milliseconds(500));
                             whitePerspective = !whitePerspective;
                             color = whitePerspective ? "w" : "b";
                         }
@@ -122,8 +154,16 @@ int main(void) {
                         tile_pressed = tile;
                         std::string clicked = gameboard->chess_board[tile.posY][tile.posX];
                         if (clicked != " " && clicked.substr(0, 1) == color) {
+                            if (!buffer.loadFromFile("audio/move.mp3")) {
+                                std::cerr << "Error loading sound effect" << std::endl;
+                                return -1;
+                            }
+                            sf::Sound sound(buffer);
+                            sound.play();
                             auto moves = validMoves(pieces, gameboard->chess_board, whitePerspective);
                             highlights = moves[clicked];
+                            
+
                         } else {
                             highlights.clear();
                         }
