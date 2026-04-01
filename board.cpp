@@ -16,6 +16,11 @@ Board::Board(sf::RenderWindow &window, PieceMap& pieces, int frameRate): window(
 }
 
 void Board::makeBoard() {
+    for (auto &row: this->chess_board) {
+        for (auto &cell : row) {
+            cell = " ";
+        }
+    }
     for (auto &pair : this->pieces) {
         int row = pair.second->position.posY;
         int col = pair.second->position.posX;
