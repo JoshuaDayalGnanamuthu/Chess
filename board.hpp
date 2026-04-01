@@ -21,16 +21,13 @@ public:
     size_t num_cols = 8;
     board chess_board = board(num_rows, std::vector<std::string>(num_cols, " "));
     sf::RenderWindow &window;
-    Positions piece_positions;
+    PieceMap& pieces;
 
-    Board(sf::RenderWindow &window, Positions piece_positions = Board::default_piece_positions,
-          int frameRate = 60);
+    Board(sf::RenderWindow &window, PieceMap& pieces, int frameRate = 60);
 
     void makeBoard();
     void printBoardWhite();
     void printBoardBlack();
-
-    static const Positions default_piece_positions;
 
 private:
     std::map<std::string, std::string> file_paths = {
