@@ -1,6 +1,6 @@
 GCC = clang++
 CFLAGS = -std=c++17 -Wall -Wextra -pedantic
-LDFLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lsfml-graphics -lsfml-window -lsfml-system
+LDFLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 SRCS = main.cpp board.cpp rook.cpp king.cpp queen.cpp piece.cpp pawn.cpp bishop.cpp knight.cpp
 
 main: $(SRCS)
