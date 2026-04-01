@@ -8,6 +8,7 @@
 
 extern const sf::Color LIGHT_COLOR;
 extern const sf::Color DARK_COLOR;
+extern const sf::Color HIGHLIGHT_COLOR;
 extern const int TILE_SIZE;
 
 class Board {
@@ -26,8 +27,7 @@ public:
     Board(sf::RenderWindow &window, PieceMap& pieces, int frameRate = 60);
 
     void makeBoard();
-    void printBoardWhite();
-    void printBoardBlack();
+    void drawBoard(bool whitePerspective, std::vector<Position> highlights);
 
 private:
     std::map<std::string, std::string> file_paths = {
