@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 struct Position {
     int posY = -1;
@@ -9,6 +10,7 @@ struct Position {
 };
 typedef std::vector<std::vector<std::string>> board;
 typedef std::map<std::string, Position> Positions;
+
 
 class Piece {
     public:
@@ -26,3 +28,4 @@ class Piece {
         bool canMoveTo(const std::string &target_piece) const;
         static const std::map<std::string, Position> default_piece_positions;
 };
+typedef std::map<std::string, std::unique_ptr<Piece>> PieceMap;
