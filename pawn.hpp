@@ -9,7 +9,6 @@
 
 class Pawn: public Piece {
     public:
-        bool hasMoved = false;
         
         Pawn(std::string number, Position position, bool isWhite) 
         : Piece("P", number, position, isWhite) {}
