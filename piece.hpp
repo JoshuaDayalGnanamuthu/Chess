@@ -7,6 +7,10 @@
 struct Position {
     int posY = -1;
     int posX = -1;
+
+    bool operator==(const Position &other) const {
+        return posY == other.posY && posX == other.posX;
+    }
 };
 typedef std::vector<std::vector<std::string>> board;
 typedef std::map<std::string, Position> Positions;
@@ -19,6 +23,7 @@ class Piece {
         std::string number;
         std::string piece;
         Position position;
+        bool hasMoved = false;
 
         Piece(std::string type, std::string number, Position position, bool isWhite);
         virtual std::vector<Position> validMoves(const board &chess_board) = 0;
