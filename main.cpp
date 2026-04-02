@@ -119,16 +119,7 @@ int main(void) {
                     if (!highlights.empty() && std::find(highlights.cbegin(), highlights.cend(), tile) != highlights.cend()) {
                         std::string piece = gameboard->chess_board[tile_pressed.posY][tile_pressed.posX];
                         std::string target_piece = gameboard->chess_board[tile.posY][tile.posX];
-                        if (target_piece != " ") {
-                            pieces.erase(target_piece);
-                        }
 
-                        gameboard->chess_board[tile.posY][tile.posX] = piece;
-                        gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
-                        pieces[piece]->position = tile;
-                        pieces[piece]->hasMoved = true;
-                        highlights.clear();
-                        
                         sf::SoundBuffer moveBuffer;
                         sf::SoundBuffer captureBuffer;
                         if (!moveBuffer.loadFromFile("audio/move.mp3")) {
@@ -139,6 +130,23 @@ int main(void) {
                             std::cerr << "Error loading sound effect" << std::endl;
                             return -1;
                         }
+                        
+                        gameboard->chess_board[tile.posY][tile.posX] = piece;
+                        gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
+                        pieces[piece]->position = tile;
+                        pieces[piece]->hasMoved = true;
+                        if (pieces[piece]->isCheck(gameboard->chess_board, pieces, whitePerspective)) {
+                            sf::Sound captureSound(captureBuffer);
+                            gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = piece;
+                            gameboard->chess_board[tile.posY][tile.posX] = target_piece;
+                            pieces[piece]->position = tile_pressed;
+                            pieces[piece]->hasMoved = false;
+                            continue;
+                        }
+                        if (target_piece != " ") {
+                            pieces.erase(target_piece);
+                        }
+                        highlights.clear();
 
                         sf::Sound moveSound(moveBuffer);
                         sf::Sound captureSound(captureBuffer);
