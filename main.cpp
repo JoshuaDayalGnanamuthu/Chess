@@ -90,6 +90,7 @@ int main(void) {
     std::string color = whitePerspective ? "w" : "b";
     std::vector<Position> highlights;
     Position tile_pressed = {-1, -1};
+
     sf::SoundBuffer buffer;
     if (!buffer.loadFromFile("audio/game_start.mp3")) {
         std::cerr << "Error loading sound effect" << std::endl;
@@ -98,59 +99,67 @@ int main(void) {
     sf::Sound sound(buffer);
     sound.play();
 
+    sf::SoundBuffer gameOverBuffer;
+    gameOverBuffer.loadFromFile("audio/game_start.mp3");
+    sf::Sound endsound(gameOverBuffer);
+
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>())
+            if (event->is<sf::Event::Closed>()) {
+                endsound.play();
+                while (endsound.getStatus() == sf::Sound::Status::Playing) {
+                    sf::sleep(sf::milliseconds(100));
+                }
                 window.close();
-
+            }
+                
             if (const auto* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (mouseEvent->button == sf::Mouse::Button::Left) {
-                    Position tile = tilePressed(mouseEvent->position.x / TILE_SIZE,
-                                               mouseEvent->position.y / TILE_SIZE,
-                                               whitePerspective);
-                    if (!highlights.empty()) {
-                        if (std::find(highlights.cbegin(), highlights.cend(), tile) != highlights.cend()) {
-                            std::string piece = gameboard->chess_board[tile_pressed.posY][tile_pressed.posX];
-                            std::string target_piece = gameboard->chess_board[tile.posY][tile.posX];
-                            if (target_piece != " ") {
-                                pieces.erase(target_piece);
-                            }
-                            gameboard->chess_board[tile.posY][tile.posX] = piece;
-                            gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
-                            pieces[piece]->position = tile;
-                            pieces[piece]->hasMoved = true;
-                            highlights.clear();
-                            
-                            sf::SoundBuffer moveBuffer;
-                            sf::SoundBuffer captureBuffer;
-                            if (!moveBuffer.loadFromFile("audio/move.mp3")) {
-                                std::cerr << "Error loading sound effect" << std::endl;
-                                return -1;
-                            }
-                            if (!captureBuffer.loadFromFile("audio/capture.mp3")) {
-                                std::cerr << "Error loading sound effect" << std::endl;
-                                return -1;
-                            }
-
-                            sf::Sound moveSound(moveBuffer);
-                            sf::Sound captureSound(captureBuffer);
-                            if (target_piece != " ") {
-                                captureSound.play();
-                            } else {
-                                moveSound.play(); 
-                            }
-                            
-
-                            gameboard->drawBoard(whitePerspective, highlights);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                            whitePerspective = !whitePerspective;
-                            color = whitePerspective ? "w" : "b";
+                    Position tile = tilePressed(mouseEvent->position.x / TILE_SIZE, mouseEvent->position.y / TILE_SIZE, whitePerspective);
+                    if (!highlights.empty() && std::find(highlights.cbegin(), highlights.cend(), tile) != highlights.cend()) {
+                        std::string piece = gameboard->chess_board[tile_pressed.posY][tile_pressed.posX];
+                        std::string target_piece = gameboard->chess_board[tile.posY][tile.posX];
+                        if (target_piece != " ") {
+                            pieces.erase(target_piece);
                         }
+
+                        gameboard->chess_board[tile.posY][tile.posX] = piece;
+                        gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
+                        pieces[piece]->position = tile;
+                        pieces[piece]->hasMoved = true;
+                        highlights.clear();
+                        
+                        sf::SoundBuffer moveBuffer;
+                        sf::SoundBuffer captureBuffer;
+                        if (!moveBuffer.loadFromFile("audio/move.mp3")) {
+                            std::cerr << "Error loading sound effect" << std::endl;
+                            return -1;
+                        }
+                        if (!captureBuffer.loadFromFile("audio/capture.mp3")) {
+                            std::cerr << "Error loading sound effect" << std::endl;
+                            return -1;
+                        }
+
+                        sf::Sound moveSound(moveBuffer);
+                        sf::Sound captureSound(captureBuffer);
+
+                        if (target_piece != " ") {
+                            captureSound.play();
+                        } 
+                        else {
+                            moveSound.play(); 
+                        }
+
+                        gameboard->drawBoard(whitePerspective, highlights);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+                        whitePerspective = !whitePerspective;
+                        color = whitePerspective ? "w" : "b";
                     }
                     if (tile_pressed.posX == tile.posX && tile_pressed.posY == tile.posY) {
                         tile_pressed = {-1, -1};
                         highlights.clear();
-                    } else {
+                    } 
+                    else {
                         tile_pressed = tile;
                         std::string clicked = gameboard->chess_board[tile.posY][tile.posX];
                         if (clicked != " " && clicked.substr(0, 1) == color) {
@@ -163,12 +172,11 @@ int main(void) {
                             auto moves = validMoves(pieces, gameboard->chess_board, whitePerspective);
                             highlights = moves[clicked];
                             
-
-                        } else {
+                        } 
+                        else {
                             highlights.clear();
                         }
-                    }
-                    
+                    } 
                 }
             }
         }
