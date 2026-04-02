@@ -15,6 +15,8 @@ struct Position {
 typedef std::vector<std::vector<std::string>> board;
 typedef std::map<std::string, Position> Positions;
 
+class Piece;
+typedef std::map<std::string, std::unique_ptr<Piece>> PieceMap;
 
 class Piece {
     public:
@@ -26,6 +28,7 @@ class Piece {
         bool hasMoved = false;
 
         Piece(std::string type, std::string number, Position position, bool isWhite);
+        bool isCheck(const board &chess_board, const PieceMap &pieces, bool isWhite) const;
         virtual std::vector<Position> validMoves(const board &chess_board) = 0;
         virtual ~Piece() = default;
 
@@ -33,4 +36,3 @@ class Piece {
         bool canMoveTo(const std::string &target_piece) const;
         static const std::map<std::string, Position> default_piece_positions;
 };
-typedef std::map<std::string, std::unique_ptr<Piece>> PieceMap;

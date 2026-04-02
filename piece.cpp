@@ -12,6 +12,23 @@ bool Piece::canMoveTo(const std::string &target_piece) const {
     if (!isWhite && target_piece.substr(0, 1) == "w") return true;
     return false;
 }
+bool Piece::isCheck(const board &chess_board, const PieceMap &pieces, bool isWhite) const {
+    std::string opponentColor = isWhite ? "b" : "w";
+    std::string king = isWhite ? "wK" : "bK";
+    king += "1";
+    Position king_position = pieces.at(king)->position;
+    
+    for (const auto& pair : pieces) {
+        if (pair.first.substr(0, 1) == opponentColor) {
+            auto moves = pair.second->validMoves(chess_board);
+            if (std::find(moves.begin(), moves.end(), king_position) != moves.end()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 
 const std::map<std::string, Position> Piece::default_piece_positions = 
 {
