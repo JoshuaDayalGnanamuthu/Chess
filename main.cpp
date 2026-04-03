@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <optional>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <memory>
@@ -75,7 +76,54 @@ Position tilePressed(int posX, int posY, bool isWhite) {
     return tile;
 }
 
+bool isCheckmate(PieceMap& pieces, Board* gameboard, bool isWhite) {
+    if (!pieces.begin()->second) return false;
+    if (!pieces.begin()->second->isCheck(gameboard->chess_board, pieces, isWhite)) {
+        return false;
+    }
+
+    auto moves = validMoves(pieces, gameboard->chess_board, isWhite);
+    for (const auto& pair : moves) {
+        const std::string& pieceId = pair.first;
+        const Position originalPosition = pieces[pieceId]->position;
+        const bool originalHasMoved = pieces[pieceId]->hasMoved;
+
+        for (const auto& destination : pair.second) {
+            std::string targetPiece = gameboard->chess_board[destination.posY][destination.posX];
+            std::unique_ptr<Piece> capturedPiece;
+            if (targetPiece != " ") {
+                capturedPiece = std::move(pieces[targetPiece]);
+                pieces.erase(targetPiece);
+            }
+
+            gameboard->chess_board[destination.posY][destination.posX] = pieceId;
+            gameboard->chess_board[originalPosition.posY][originalPosition.posX] = " ";
+            pieces[pieceId]->position = destination;
+            pieces[pieceId]->hasMoved = true;
+            gameboard->makeBoard();
+
+            bool stillInCheck = pieces[pieceId]->isCheck(gameboard->chess_board, pieces, isWhite);
+
+            pieces[pieceId]->position = originalPosition;
+            pieces[pieceId]->hasMoved = originalHasMoved;
+            gameboard->chess_board[originalPosition.posY][originalPosition.posX] = pieceId;
+            gameboard->chess_board[destination.posY][destination.posX] = targetPiece;
+            if (capturedPiece) {
+                pieces[targetPiece] = std::move(capturedPiece);
+            }
+            gameboard->makeBoard();
+
+            if (!stillInCheck) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 void gameOver(bool isWhite) {
+    sf::sleep(sf::milliseconds(300));
     sf::RenderWindow endscreen(sf::VideoMode({400, 200}), "Chess - Game Over");
     endscreen.setFramerateLimit(60);
 
@@ -257,6 +305,12 @@ int main(void) {
                         std::this_thread::sleep_for(std::chrono::milliseconds(800));
                         whitePerspective = !whitePerspective;
                         color = whitePerspective ? "w" : "b";
+
+                        if (pieces[piece]->isCheck(gameboard->chess_board, pieces, whitePerspective) &&
+                            isCheckmate(pieces, gameboard, whitePerspective)) {
+                            gameOver(!whitePerspective);
+                            window.close();
+                        }
                     }
                     if (tile_pressed.posX == tile.posX && tile_pressed.posY == tile.posY) {
                         tile_pressed = {-1, -1};
