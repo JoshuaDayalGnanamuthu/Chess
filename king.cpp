@@ -16,10 +16,7 @@ std::vector<Position> King::validMoves(const board &chess_board){
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
             Position new_position = {row - 1, col - 1};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            moveset.push_back(new_position);
         }
     }
 
@@ -29,10 +26,7 @@ std::vector<Position> King::validMoves(const board &chess_board){
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
             Position new_position = {row - 1, col};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            moveset.push_back(new_position);
         }
     }
 
@@ -42,10 +36,7 @@ std::vector<Position> King::validMoves(const board &chess_board){
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
             Position new_position = {row - 1, col + 1};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            moveset.push_back(new_position);
         }
     }
 
@@ -55,10 +46,7 @@ std::vector<Position> King::validMoves(const board &chess_board){
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
             Position new_position = {row, col - 1};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            moveset.push_back(new_position);
         }
     }
 
@@ -68,10 +56,7 @@ std::vector<Position> King::validMoves(const board &chess_board){
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
             Position new_position = {row, col + 1};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            moveset.push_back(new_position);
         }
     }
 
@@ -81,10 +66,7 @@ std::vector<Position> King::validMoves(const board &chess_board){
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
             Position new_position = {row + 1, col - 1};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            moveset.push_back(new_position);
         }
     }
 
@@ -93,11 +75,8 @@ std::vector<Position> King::validMoves(const board &chess_board){
         std::string piece = chess_board[row + 1][col];
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
-            Position new_position = {row + 1, col};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            Position new_position = {row + 1, col}; 
+            moveset.push_back(new_position);
         }
     }
 
@@ -107,12 +86,8 @@ std::vector<Position> King::validMoves(const board &chess_board){
         if (piece == " " || (this->isWhite && piece.substr(0,1) == "b") || (!this->isWhite && piece.substr(0,1) == "w"))
         {
             Position new_position = {row + 1, col + 1};
-            if (isLegal(new_position)) 
-            {
-                moveset.push_back(new_position);
-            }
+            moveset.push_back(new_position);
         }
     }
-    
     return moveset;
 }
