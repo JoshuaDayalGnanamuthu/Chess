@@ -28,6 +28,7 @@ public:
 
     void makeBoard();
     void drawBoard(bool whitePerspective, std::vector<Position> highlights);
+    void clearTextures() { textures.clear(); }
 
 private:
     std::map<std::string, std::string> file_paths = {
