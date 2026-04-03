@@ -119,7 +119,21 @@ int main(void) {
         return -1;
     }
     sf::Sound illegalSound(isIllegalBuffer);
-    
+
+    sf::SoundBuffer moveBuffer;
+    if (!moveBuffer.loadFromFile("audio/move.mp3")) {
+        std::cerr << "Error loading sound effect" << std::endl;
+        return -1;
+    }
+    sf::Sound moveSound(moveBuffer);
+
+    sf::SoundBuffer captureBuffer;
+    if (!captureBuffer.loadFromFile("audio/capture.mp3")) {
+        std::cerr << "Error loading sound effect" << std::endl;
+        return -1;
+    }
+    sf::Sound captureSound(captureBuffer);
+
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
@@ -137,17 +151,6 @@ int main(void) {
                         std::string piece = gameboard->chess_board[tile_pressed.posY][tile_pressed.posX];
                         std::string target_piece = gameboard->chess_board[tile.posY][tile.posX];
 
-                        sf::SoundBuffer moveBuffer;
-                        sf::SoundBuffer captureBuffer;
-                        if (!moveBuffer.loadFromFile("audio/move.mp3")) {
-                            std::cerr << "Error loading sound effect" << std::endl;
-                            return -1;
-                        }
-                        if (!captureBuffer.loadFromFile("audio/capture.mp3")) {
-                            std::cerr << "Error loading sound effect" << std::endl;
-                            return -1;
-                        }
-                        
                         gameboard->chess_board[tile.posY][tile.posX] = piece;
                         gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
                         pieces[piece]->position = tile;
@@ -165,9 +168,6 @@ int main(void) {
                             pieces.erase(target_piece);
                         }
                         highlights.clear();
-
-                        sf::Sound moveSound(moveBuffer);
-                        sf::Sound captureSound(captureBuffer);
 
                         if (target_piece != " ") {
                             captureSound.play();
