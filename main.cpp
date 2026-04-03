@@ -75,6 +75,72 @@ Position tilePressed(int posX, int posY, bool isWhite) {
     return tile;
 }
 
+void gameOver(bool isWhite) {
+    sf::RenderWindow endscreen(sf::VideoMode({400, 200}), "Chess - Game Over");
+    endscreen.setFramerateLimit(60);
+
+    sf::Font font;
+    bool fontLoaded = false;
+    const std::vector<std::string> fontPaths = {
+        "fonts/arial.ttf",
+        "/Library/Fonts/Arial.ttf",
+        "/System/Library/Fonts/SFNS.ttf",
+        "C:/Windows/Fonts/arial.ttf"
+    };
+    for (const auto& path : fontPaths) {
+        if (font.openFromFile(path)) {
+            fontLoaded = true;
+            break;
+        }
+    }
+
+    sf::SoundBuffer gameOverBuffer;
+    if (!gameOverBuffer.loadFromFile("audio/game_start.mp3")) {
+        std::cerr << "Error loading sound effect" << std::endl;
+    }
+    sf::Sound endsound(gameOverBuffer);
+    endsound.play();
+
+    if (!fontLoaded) {
+        while (endscreen.isOpen()) {
+            while (const std::optional event = endscreen.pollEvent()) {
+                if (event->is<sf::Event::Closed>() ||
+                    event->is<sf::Event::KeyPressed>() ||
+                    event->is<sf::Event::MouseButtonPressed>()) {
+                    endscreen.close();
+                }
+            }
+            endscreen.clear(sf::Color(20, 20, 40));
+            endscreen.display();
+        }
+        return;
+    }
+
+    sf::Text title(font, isWhite ? "White wins!" : "Black wins!", 40);
+    title.setFillColor(sf::Color::White);
+    title.setStyle(sf::Text::Bold);
+    title.setPosition({30.f, 40.f});
+
+    sf::Text instructions(font, "Press any key or close the window to exit.", 18);
+    instructions.setFillColor(sf::Color(180, 180, 180));
+    instructions.setPosition({30.f, 110.f});
+
+    while (endscreen.isOpen()) {
+        while (const std::optional event = endscreen.pollEvent()) {
+            if (event->is<sf::Event::Closed>() ||
+                event->is<sf::Event::KeyPressed>() ||
+                event->is<sf::Event::MouseButtonPressed>()) {
+                endscreen.close();
+            }
+        }
+
+        endscreen.clear(sf::Color(20, 20, 40));
+        endscreen.draw(title);
+        endscreen.draw(instructions);
+        endscreen.display();
+    }
+}
+
 int main(void) {
     sf::RenderWindow window(sf::VideoMode({400, 400}), "Chess");
     window.setFramerateLimit(60);
@@ -151,6 +217,11 @@ int main(void) {
                         std::string piece = gameboard->chess_board[tile_pressed.posY][tile_pressed.posX];
                         std::string target_piece = gameboard->chess_board[tile.posY][tile.posX];
 
+                        std::unique_ptr<Piece> capturedPiece;
+                        if (target_piece != " ") {
+                            capturedPiece = std::move(pieces[target_piece]);
+                            pieces.erase(target_piece);
+                        }
                         gameboard->chess_board[tile.posY][tile.posX] = piece;
                         gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
                         pieces[piece]->position = tile;
@@ -162,10 +233,10 @@ int main(void) {
                             gameboard->chess_board[tile.posY][tile.posX] = target_piece;
                             pieces[piece]->position = tile_pressed;
                             pieces[piece]->hasMoved = false;
+                            if (capturedPiece) {
+                                pieces[target_piece] = std::move(capturedPiece);
+                            }
                             continue;
-                        }
-                        if (target_piece != " ") {
-                            pieces.erase(target_piece);
                         }
                         highlights.clear();
 
