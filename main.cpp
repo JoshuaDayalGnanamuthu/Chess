@@ -64,6 +64,44 @@ std::map<std::string, std::vector<Position>> validMoves(PieceMap& pieces, const 
     return moveset;
 }
 
+std::vector<Position> legalMoves(const std::string& pieceId, PieceMap& pieces, Board* gameboard, bool isWhite) {
+    auto valid = pieces[pieceId]->validMoves(gameboard->chess_board);
+    std::vector<Position> legal;
+
+    Position origPos = pieces[pieceId]->position;
+    bool origHasMoved = pieces[pieceId]->hasMoved;
+
+    for (const auto& dest : valid) {
+        std::string target = gameboard->chess_board[dest.posY][dest.posX];
+        std::unique_ptr<Piece> captured;
+        if (target != " ") {
+            captured = std::move(pieces[target]);
+            pieces.erase(target);
+        }
+
+        gameboard->chess_board[dest.posY][dest.posX] = pieceId;
+        gameboard->chess_board[origPos.posY][origPos.posX] = " ";
+        pieces[pieceId]->position = dest;
+        pieces[pieceId]->hasMoved = true;
+        gameboard->makeBoard();
+
+        if (!pieces[pieceId]->isCheck(gameboard->chess_board, pieces, isWhite)) {
+            legal.push_back(dest);
+        }
+
+        pieces[pieceId]->position = origPos;
+        pieces[pieceId]->hasMoved = origHasMoved;
+        gameboard->chess_board[origPos.posY][origPos.posX] = pieceId;
+        gameboard->chess_board[dest.posY][dest.posX] = target;
+        if (captured) {
+            pieces[target] = std::move(captured);
+        }
+        gameboard->makeBoard();
+    }
+
+    return legal;
+}
+
 Position tilePressed(int posX, int posY, bool isWhite) {
     Position tile;
     if (isWhite) {
@@ -122,71 +160,11 @@ bool isCheckmate(PieceMap& pieces, Board* gameboard, bool isWhite) {
     return true;
 }
 
-void gameOver(bool isWhite) {
+void gameOver(Board* gameboard, bool isWhite) {
     sf::sleep(sf::milliseconds(300));
-    sf::RenderWindow endscreen(sf::VideoMode({400, 200}), "Chess - Game Over");
-    endscreen.setFramerateLimit(60);
-
-    sf::Font font;
-    bool fontLoaded = false;
-    const std::vector<std::string> fontPaths = {
-        "fonts/arial.ttf",
-        "/Library/Fonts/Arial.ttf",
-        "/System/Library/Fonts/SFNS.ttf",
-        "C:/Windows/Fonts/arial.ttf"
-    };
-    for (const auto& path : fontPaths) {
-        if (font.openFromFile(path)) {
-            fontLoaded = true;
-            break;
-        }
-    }
-
-    sf::SoundBuffer gameOverBuffer;
-    if (!gameOverBuffer.loadFromFile("audio/game_start.mp3")) {
-        std::cerr << "Error loading sound effect" << std::endl;
-    }
-    sf::Sound endsound(gameOverBuffer);
-    endsound.play();
-
-    if (!fontLoaded) {
-        while (endscreen.isOpen()) {
-            while (const std::optional event = endscreen.pollEvent()) {
-                if (event->is<sf::Event::Closed>() ||
-                    event->is<sf::Event::KeyPressed>() ||
-                    event->is<sf::Event::MouseButtonPressed>()) {
-                    endscreen.close();
-                }
-            }
-            endscreen.clear(sf::Color(20, 20, 40));
-            endscreen.display();
-        }
-        return;
-    }
-
-    sf::Text title(font, isWhite ? "White wins!" : "Black wins!", 40);
-    title.setFillColor(sf::Color::White);
-    title.setStyle(sf::Text::Bold);
-    title.setPosition({30.f, 40.f});
-
-    sf::Text instructions(font, "Press any key or close the window to exit.", 18);
-    instructions.setFillColor(sf::Color(180, 180, 180));
-    instructions.setPosition({30.f, 110.f});
-
-    while (endscreen.isOpen()) {
-        while (const std::optional event = endscreen.pollEvent()) {
-            if (event->is<sf::Event::Closed>() ||
-                event->is<sf::Event::KeyPressed>() ||
-                event->is<sf::Event::MouseButtonPressed>()) {
-                endscreen.close();
-            }
-        }
-
-        endscreen.clear(sf::Color(20, 20, 40));
-        endscreen.draw(title);
-        endscreen.draw(instructions);
-        endscreen.display();
-    }
+    gameboard->clearTextures();
+    std::cout << "Game Over! " << (isWhite ? "White" : "Black") << " wins!" << std::endl;
+    return;
 }
 
 int main(void) {
@@ -308,8 +286,7 @@ int main(void) {
 
                         if (pieces[piece]->isCheck(gameboard->chess_board, pieces, whitePerspective) &&
                             isCheckmate(pieces, gameboard, whitePerspective)) {
-                            gameOver(!whitePerspective);
-                            window.close();
+                            gameOver(gameboard,!whitePerspective);
                         }
                     }
                     if (tile_pressed.posX == tile.posX && tile_pressed.posY == tile.posY) {
@@ -327,7 +304,7 @@ int main(void) {
                             sf::Sound sound(buffer);
                             sound.play();
                             auto moves = validMoves(pieces, gameboard->chess_board, whitePerspective);
-                            highlights = moves[clicked];
+                            highlights = legalMoves(clicked, pieces, gameboard, whitePerspective);
                             
                         } 
                         else {
