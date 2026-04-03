@@ -5,8 +5,7 @@ A simple chess game implemented in C++ using the SFML library.
 ## Features
 
 - Full chess board with piece movement
-- Legal move validation (prevents illegal moves that would leave king in check)
-- Checkmate detection with game over screen
+- Legal move validation
 - Sound effects for moves, captures, and check
 - Visual highlights for possible moves
 - Perspective switching between white and black
@@ -24,7 +23,7 @@ A simple chess game implemented in C++ using the SFML library.
    brew install sfml
    ```
 
-2. Clone or download the project files.
+2. Clone or download the project files.t
 
 3. Run make to build:
    ```
@@ -33,21 +32,10 @@ A simple chess game implemented in C++ using the SFML library.
 
 ## Running
 
-Execute the built binary:
+Execute the built executeable:
 ```
 ./build/main
 ```
-
-## Controls
-
-- Left-click on a piece to select it and see highlighted legal moves
-- Left-click on a highlighted square to move the piece
-- Close the window to exit
-
-## Game Rules
-
-Standard chess rules apply. The game detects checkmate and displays a winner screen.
-
 ## File Structure
 
 - `main.cpp`: Main game loop and logic
@@ -55,9 +43,5 @@ Standard chess rules apply. The game detects checkmate and displays a winner scr
 - `piece.cpp/hpp`: Base piece class
 - `king.cpp/hpp`, `queen.cpp/hpp`, etc.: Individual piece implementations
 - `audio/`: Sound effect files
-- `icons/`: Icon file
+- `icons/`: Other sprites to select from
 - `koval/`: Piece sprite images
-
-## License
-
-This project is for educational purposes.
