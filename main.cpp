@@ -100,9 +100,26 @@ int main(void) {
     sound.play();
 
     sf::SoundBuffer gameOverBuffer;
-    gameOverBuffer.loadFromFile("audio/game_start.mp3");
+    if (!gameOverBuffer.loadFromFile("audio/game_start.mp3")) {
+        std::cerr << "Error loading sound effect" << std::endl;
+        return -1;
+    }
     sf::Sound endsound(gameOverBuffer);
 
+    sf::SoundBuffer isCheckBuffer;
+    if (!isCheckBuffer.loadFromFile("audio/move-check.mp3")) {
+        std::cerr << "Error loading sound effect" << std::endl;
+        return -1;
+    }
+    sf::Sound checkSound(isCheckBuffer);
+
+    sf::SoundBuffer isIllegalBuffer;
+    if (!isIllegalBuffer.loadFromFile("audio/illegal.mp3")) {
+        std::cerr << "Error loading sound effect" << std::endl;
+        return -1;
+    }
+    sf::Sound illegalSound(isIllegalBuffer);
+    
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
@@ -135,8 +152,9 @@ int main(void) {
                         gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = " ";
                         pieces[piece]->position = tile;
                         pieces[piece]->hasMoved = true;
+                        gameboard->makeBoard();
                         if (pieces[piece]->isCheck(gameboard->chess_board, pieces, whitePerspective)) {
-                            sf::Sound captureSound(captureBuffer);
+                            illegalSound.play();
                             gameboard->chess_board[tile_pressed.posY][tile_pressed.posX] = piece;
                             gameboard->chess_board[tile.posY][tile.posX] = target_piece;
                             pieces[piece]->position = tile_pressed;
@@ -153,9 +171,15 @@ int main(void) {
 
                         if (target_piece != " ") {
                             captureSound.play();
+                            if (pieces[piece]->isCheck(gameboard->chess_board, pieces, !whitePerspective)) {
+                                checkSound.play();
+                            }
                         } 
                         else {
-                            moveSound.play(); 
+                            moveSound.play();
+                            if (pieces[piece]->isCheck(gameboard->chess_board, pieces, !whitePerspective)) {
+                                checkSound.play();
+                            } 
                         }
 
                         gameboard->drawBoard(whitePerspective, highlights);
