@@ -116,7 +116,3 @@ std::vector<Position> King::validMoves(const board &chess_board){
     
     return moveset;
 }
-
-bool King::isLegal(const Position &position) {
-    return true;
-}

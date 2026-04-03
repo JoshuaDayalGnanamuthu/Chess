@@ -15,6 +15,5 @@ class King: public Piece {
         : Piece("K", number, position, isWhite) {}
 
         std::vector<Position> validMoves(const board &chess_board);
-        bool isLegal(const Position &position);
    
 };
