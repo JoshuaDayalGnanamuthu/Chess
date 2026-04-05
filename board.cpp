@@ -42,6 +42,7 @@ void Board::makeBoard() {
         int col = pair.second->position.posX;
         this->chess_board[row][col] = pair.first;
     }
+    this->evaluate();
 }
 
 void Board::MakeSprites() 
