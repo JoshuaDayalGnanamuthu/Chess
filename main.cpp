@@ -17,6 +17,12 @@
 #include <chrono>
 #include <thread>
 
+typedef struct MiniMaxResult {
+    std::string piece;
+    Position move;
+    int score;
+} MiniMaxResult;
+
 std::map<std::string, int> pieceValues = {
     {"P", 10},
     {"N", 30},
@@ -176,6 +182,108 @@ void gameOver(Board* gameboard, bool isWhite) {
     return;
 }
 
+int evaluateBoard(PieceMap &pieces, Board* gameboard) {
+    gameboard->evaluate();
+    return gameboard->whiteScore - gameboard->blackScore;
+}
+
+MiniMaxResult MiniMax(PieceMap &pieces, Board* gameboard, int depth, bool isMaximizing, bool isWhite) {
+    if (depth == 0 || isCheckmate(pieces, gameboard, isWhite)) {
+        return {"", {-1, -1}, evaluateBoard(pieces, gameboard)};
+    }
+
+    if (isMaximizing) {
+        int maxEval = std::numeric_limits<int>::min();
+        std::string bestPiece;
+        Position bestMove = {-1, -1};
+        auto moves = validMoves(pieces, gameboard->chess_board, isWhite);
+
+        for (const auto &pair : moves) {
+            const std::string &pieceId = pair.first;
+            const Position originalPosition = pieces[pieceId]->position;
+            const bool originalHasMoved = pieces[pieceId]->hasMoved;
+
+            for (const auto &destination : pair.second) {
+                std::string targetPiece = gameboard->chess_board[destination.posY][destination.posX];
+                std::unique_ptr<Piece> capturedPiece;
+                if (targetPiece != " ") {
+                    capturedPiece = std::move(pieces[targetPiece]);
+                    pieces.erase(targetPiece);
+                }
+
+                gameboard->chess_board[destination.posY][destination.posX] = pieceId;
+                gameboard->chess_board[originalPosition.posY][originalPosition.posX] = " ";
+                pieces[pieceId]->position = destination;
+                pieces[pieceId]->hasMoved = true;
+                gameboard->makeBoard();
+
+                int eval = MiniMax(pieces, gameboard, depth - 1, false, !isWhite).score;
+
+                pieces[pieceId]->position = originalPosition;
+                pieces[pieceId]->hasMoved = originalHasMoved;
+                gameboard->chess_board[originalPosition.posY][originalPosition.posX] = pieceId;
+                gameboard->chess_board[destination.posY][destination.posX] = targetPiece;
+                if (capturedPiece) {
+                    pieces[targetPiece] = std::move(capturedPiece);
+                }
+                gameboard->makeBoard();
+
+                if (eval > maxEval) {
+                    maxEval = eval;
+                    bestPiece = pieceId;
+                    bestMove = destination;
+                }
+            }
+        }
+        return {bestPiece, bestMove, maxEval};
+
+    } else {
+        int minEval = std::numeric_limits<int>::max();
+        std::string bestPiece;
+        Position bestMove = {-1, -1};
+        auto moves = validMoves(pieces, gameboard->chess_board, isWhite);
+
+        for (const auto &pair : moves) {
+            const std::string &pieceId = pair.first;
+            const Position originalPosition = pieces[pieceId]->position;
+            const bool originalHasMoved = pieces[pieceId]->hasMoved;
+
+            for (const auto &destination : pair.second) {
+                std::string targetPiece = gameboard->chess_board[destination.posY][destination.posX];
+                std::unique_ptr<Piece> capturedPiece;
+                if (targetPiece != " ") {
+                    capturedPiece = std::move(pieces[targetPiece]);
+                    pieces.erase(targetPiece);
+                }
+
+                gameboard->chess_board[destination.posY][destination.posX] = pieceId;
+                gameboard->chess_board[originalPosition.posY][originalPosition.posX] = " ";
+                pieces[pieceId]->position = destination;
+                pieces[pieceId]->hasMoved = true;
+                gameboard->makeBoard();
+
+                int eval = MiniMax(pieces, gameboard, depth - 1, true, !isWhite).score;
+
+                pieces[pieceId]->position = originalPosition;
+                pieces[pieceId]->hasMoved = originalHasMoved;
+                gameboard->chess_board[originalPosition.posY][originalPosition.posX] = pieceId;
+                gameboard->chess_board[destination.posY][destination.posX] = targetPiece;
+                if (capturedPiece) {
+                    pieces[targetPiece] = std::move(capturedPiece);
+                }
+                gameboard->makeBoard();
+
+                if (eval < minEval) {
+                    minEval = eval;
+                    bestPiece = pieceId;
+                    bestMove = destination;
+                }
+            }
+        }
+        return {bestPiece, bestMove, minEval};
+    }
+}
+
 int main(void) {
     sf::RenderWindow window(sf::VideoMode({400, 400}), "Chess");
     window.setFramerateLimit(60);
@@ -288,6 +396,7 @@ int main(void) {
                             } 
                         }
 
+                        std::cout << "White Score: " << gameboard->whiteScore << " | Black Score: " << gameboard->blackScore << std::endl;
                         gameboard->drawBoard(whitePerspective, highlights);
                         std::this_thread::sleep_for(std::chrono::milliseconds(800));
                         whitePerspective = !whitePerspective;
