@@ -17,6 +17,15 @@
 #include <chrono>
 #include <thread>
 
+std::map<std::string, int> pieceValues = {
+    {"P", 10},
+    {"N", 30},
+    {"B", 30},
+    {"R", 50},
+    {"Q", 90},
+    {"K", 900}
+};
+
 PieceMap makePieces() {
     PieceMap pieces;
     pieces["bR2"] = std::make_unique<Rook>("2", Position{0, 0}, false);

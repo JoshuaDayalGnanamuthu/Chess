@@ -16,6 +16,21 @@ Board::Board(sf::RenderWindow &window, PieceMap& pieces, int frameRate): window(
     MakeSprites();
 }
 
+void Board::evaluate() {
+    this->whiteScore = 0;
+    this->blackScore = 0;
+    for (const auto &pair: this->pieces) {
+        std::string pieceType = pair.second->type;
+        int pieceValue = pieceValues[pieceType];
+        if (pair.second->isWhite) {
+            this->whiteScore += pieceValue;
+        }
+        else {
+            this->blackScore += pieceValue;
+        }
+    }
+}
+
 void Board::makeBoard() {
     for (auto &row: this->chess_board) {
         for (auto &cell : row) {

@@ -23,12 +23,15 @@ public:
     board chess_board = board(num_rows, std::vector<std::string>(num_cols, " "));
     sf::RenderWindow &window;
     PieceMap& pieces;
+    int whiteScore;
+    int blackScore;
 
     Board(sf::RenderWindow &window, PieceMap& pieces, int frameRate = 60);
 
     void makeBoard();
     void drawBoard(bool whitePerspective, std::vector<Position> highlights);
     void clearTextures() { textures.clear(); }
+    void evaluate();
 
 private:
     std::map<std::string, std::string> file_paths = {
@@ -39,6 +42,15 @@ private:
         {" ", " "}
     };
     std::map<std::string, sf::Texture> textures;
+
+    std::map<std::string, int> pieceValues = {
+        {"P", 10},
+        {"N", 30},
+        {"B", 30},
+        {"R", 50},
+        {"Q", 90},
+        {"K", 900}
+    };
 
     void MakeSprites();
 };
